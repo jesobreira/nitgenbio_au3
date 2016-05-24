@@ -1,7 +1,5 @@
 #include 'NGenBio.au3'
 
-; Ask for name (to show how to work with payloads and store info on the fingerprint data)
-$sName = InputBox("Test", "Enter your name")
 
 ; Enumerate devices
 $numberOfDevices = _NEnumerate() ; Enumerate all connected devices
@@ -10,14 +8,20 @@ If Not $numberOfDevices Then Exit ; no device connected
 
 _NOpen() ; Open device (no argument = open latest connected device)
 
+; ======================================================================
 ; Example 1: just get a fingerprint and display the string associated to it
+
 MsgBox(0, "Your fingerprint means:", _NCapture())
+
+; ======================================================================
+; Example 2: verification (expecting for a specified person)
+
+; Ask for name (to show how to work with payloads and store info on the fingerprint data)
+$sName = InputBox("Test", "Enter your name")
 
 $tmpData = _NEnroll($sName) ; Register a fingerprint (we will have a string to save in DB if we want; $sName will be saved together with the data)
 
 If Not $tmpData Then Exit ; User canceled
-
-; Example 2: verification (expecting for a specified person)
 
 $check = _NVerify($tmpData) ; Verify fingerprint (from the string that the registration gave us - it could have come from a database)
 
@@ -27,6 +31,7 @@ Else
 	MsgBox(0, '', 'That''s not you!') ; Wrong fingerprint
 EndIf
 
+; ======================================================================
 ; Example 3: identification (expecting for anyone of a group of persons)
 
 ; Add the already saved FIR data from the previous example as ID #1
