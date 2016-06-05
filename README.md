@@ -23,6 +23,8 @@ In order to start, you **must** install Nitgen SDK on your computer. Download it
 
 Although my system is x64, I only had success installing the x86 version of the SDK.
 
+Last but not least although obvious, you must install the drivers for your device. [Here](http://www.nitgen.com.br/downloads/drivers) you will find drivers for Nitgen devices.
+
 Functions
 ----
 
