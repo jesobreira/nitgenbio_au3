@@ -236,8 +236,8 @@ Func MyErrFunc()
 	$strMsg = "Error Number: " & $HexNumber & @CRLF
 	$strMsg &= "WinDescription: " & $oMyError.WinDescription & @CRLF
 	$strMsg &= "Script Line: " & $oMyError.ScriptLine & @CRLF
-	ConsoleWrite($strMsg)
-	_NDebug(1)
+	_NDebug($strMsg)
+	SetError(1)
 Endfunc
 
 Func _NDebug($ln)
