@@ -4,7 +4,17 @@
 ; Enumerate devices
 $numberOfDevices = _NEnumerate() ; Enumerate all connected devices
 
-If Not $numberOfDevices Then Exit ; no device connected
+If @error Then ; SDK is not installed
+	MsgBox(0, "Error", "Nitgen SDK is not installed.")
+	Exit
+EndIf
+
+If Not $numberOfDevices Then ; no device connected
+	MsgBox(0, "Error", "You have no connected devices or the drivers are missing.")
+	Exit
+EndIf
+
+; The solution for the two errors above are on the README.md file.
 
 _NOpen() ; Open device (no argument = open latest connected device)
 
