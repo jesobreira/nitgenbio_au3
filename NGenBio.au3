@@ -101,19 +101,26 @@ Global Const $NBioAPI_QUALITY_EXCELLENT   = 5
 
 ; Object instancing
 Global $objNBioBSP = ObjCreate("NBioBSPCOM.NBioBSP")
-Global $objDevicesList = ObjCreate("Scripting.Dictionary")
-Global $iLastDevice,$iOpenedDevice
+If Not @error Then
+   Global $objDevicesList = ObjCreate("Scripting.Dictionary")
+   Global $iLastDevice,$iOpenedDevice
 
-; Methods/properties
-Global $objDevice = $objNBioBSP.Device
-Global $objExtraction = $objNBioBSP.Extraction
-Global $objMatching = $objNBioBSP.Matching
-Global $objFPData = $objNBioBSP.FPData
-Global $objFPImage = $objNBioBSP.FPImage
-Global $objIndexSearch = $objNBioBSP.IndexSearch
-Global $objNSearch = $objNBioBSP.NSearch
+   ; Methods/properties
+   Global $objDevice = $objNBioBSP.Device
+   Global $objExtraction = $objNBioBSP.Extraction
+   Global $objMatching = $objNBioBSP.Matching
+   Global $objFPData = $objNBioBSP.FPData
+   Global $objFPImage = $objNBioBSP.FPImage
+   Global $objIndexSearch = $objNBioBSP.IndexSearch
+   Global $objNSearch = $objNBioBSP.NSearch
+
+   Global $bUnderError = False
+Else
+   Global $bUnderError = True
+EndIf
 
 Func _NEnumerate()
+   If $bUnderError Then Return SetError(1, 0, 0)
 	$objDevicesList.RemoveAll
 	$objDevice.Enumerate
 	For $iDeviceNumber = 0 To $objDevice.EnumCount-1
@@ -127,6 +134,7 @@ Func _NEnumerate()
 EndFunc
 
 Func _NOpen($iDevice = Default)
+   If $bUnderError Then Return SetError(1, 0, 0)
 	If $iDevice = Default Then $iDevice = $iLastDevice
 	$objDevice.Open($iDevice)
 	If $objDevice.ErrorCode Then Return SetError($objDevice.ErrorCode, 0, False)
@@ -135,6 +143,7 @@ Func _NOpen($iDevice = Default)
 EndFunc
 
 Func _NEnroll($sPayload = Null)
+   If $bUnderError Then Return SetError(1, 0, 0)
 	$objExtraction.Enroll($sPayload, null)
 	If $objExtraction.ErrorCode = 0 Then
 		Return $objExtraction.TextEncodeFIR
@@ -144,6 +153,7 @@ Func _NEnroll($sPayload = Null)
 EndFunc
 
 Func _NCreateTemplate($sFIR, $sPayload)
+   If $bUnderError Then Return SetError(1, 0, 0)
 	$objFPData.CreateTemplate($sFIR, null, $sPayload)
 	If $objFPData.ErrorCode = 0 Then
 		Return $objFPData.TextEncodeFIR
@@ -153,6 +163,7 @@ Func _NCreateTemplate($sFIR, $sPayload)
 EndFunc
 
 Func _NVerify($sStoredData)
+   If $bUnderError Then Return SetError(1, 0, 0)
 	$objMatching.Verify($sStoredData)
 	Local $result = $objMatching.MatchingResult
 	If $result Then
@@ -167,6 +178,7 @@ Func _NVerify($sStoredData)
 EndFunc
 
 Func _NVerifyMatch($sGotFIR, $sStoredFIR)
+   If $bUnderError Then Return SetError(1, 0, 0)
 	$objMatching.VerifyMatch($sGotFIR, $sStoredFIR)
 	Local $result = $objMatching.MatchingResult
 	If $result Then
@@ -181,6 +193,7 @@ Func _NVerifyMatch($sGotFIR, $sStoredFIR)
 EndFunc
 
 Func _NCapture()
+   If $bUnderError Then Return SetError(1, 0, 0)
 	$objExtraction.Capture($NBioAPI_FIR_PURPOSE_VERIFY)
 	If $objExtraction.ErrorCode Then
 		Return SetError($objExtraction.ErrorCode, 0, False)
@@ -190,10 +203,12 @@ Func _NCapture()
 EndFunc
 
 Func _NSearch_Add($sFIR, $iUserID)
+   If $bUnderError Then Return SetError(1, 0, 0)
 	Return $objNSearch.AddFIR($sFIR, $iUserID)
 EndFunc
 
 Func _NSearch_Identify($sFIR, $iSecurity = 5)
+   If $bUnderError Then Return SetError(1, 0, 0)
 	$objNSearch.IdentifyUser($sFIR, $iSecurity)
 	If $objNSearch.ErrorCode Then
 		Return SetError($objNSearch.ErrorCode, 0, False)
@@ -203,6 +218,7 @@ Func _NSearch_Identify($sFIR, $iSecurity = 5)
 EndFunc
 
 Func _NClose($iDevice = Default)
+   If $bUnderError Then Return SetError(1, 0, 0)
 	If $iDevice = Default Then $iDevice = $iOpenedDevice
 	$objDevice.Close($iDevice)
 EndFunc
@@ -213,14 +229,15 @@ EndFunc
 
 
 Func MyErrFunc()
+   ;If @Compiled Then Return SetError(@error, @extended, False)
 	Local $HexNumber
 	Local $strMsg
 	$HexNumber = Hex($oMyError.Number, 8)
 	$strMsg = "Error Number: " & $HexNumber & @CRLF
 	$strMsg &= "WinDescription: " & $oMyError.WinDescription & @CRLF
 	$strMsg &= "Script Line: " & $oMyError.ScriptLine & @CRLF
-	MsgBox(0, "ERROR", $strMsg)
-	SetError(1)
+	ConsoleWrite($strMsg)
+	_NDebug(1)
 Endfunc
 
 Func _NDebug($ln)
