@@ -29,7 +29,7 @@ Functions
 ----
 
 ### _NEnumerate()
-Enumerates all connected devices, saves them in the `$objDevicesList` scripting.dictionary object as device number => device ID and returns the number of connected devices.
+You must call this function before using any other function on this lib. Enumerates all connected devices, saves them in the `$objDevicesList` scripting.dictionary object as device number => device ID and returns the number of connected devices. Note that if it returns 0 (int), this means you have no connected devices or the drivers for your device is missing (see paragraph above). Also, if it returns False (bool) and sets @error to non-zero, this means the Nitgen SDK is not installed (read above). You must recognize these errors. An example approach is at the example file on this repo.
 
 ### _NOpen( [ $iDevice = Default ] )
 Opens a device for communicating (device ID is optional, and if not supplied, the latest connected device will be selected).
